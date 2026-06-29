@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status as http_status, Query
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from ..db.index import Item, get_db, ItemPriority, ItemStatus
 from datetime import datetime, UTC
 from pydantic import BaseModel
 from math import ceil
+from typing import Optional
 
 class ItemCreate(BaseModel):
     title: str
@@ -25,49 +27,59 @@ class ItemResponse(BaseModel):
 router = APIRouter(prefix="/queries")
 
 @router.get("/")
-def read_items(page: int = Query(1, ge=1), db: Session = Depends(get_db)):
-    page_size = 10
-    offset = (page - 1) * page_size
-    total = db.query(Item).count()
+def read_items(
+    page: int = Query(1, ge=1),
+    status: Optional[ItemStatus] = Query(None), 
+    priority: Optional[ItemPriority] = Query(None),
+    search: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query("created_at"),
+    db: Session = Depends(get_db)
+):
+    try:
+        page_size = 10
+        offset = (page - 1) * page_size
+        
 
-    items = db.query(Item).offset(offset).limit(page_size).all()
+        query = db.query(Item)
+        if status:
+            query = query.filter(Item.status == status.value)
+        if priority:
+            query = query.filter(Item.priority == priority.value)
+        if search:
+            query = query.filter(Item.title.icontains(search) | Item.description.icontains(search))
+        if sort_by:
+            query = query.order_by(desc(sort_by))
+        
+        total = query.count()
+        items = query.offset(offset).limit(page_size).all()
 
-    total_pages = ceil(total / page_size)
-    return {
-        "is_success": True,
-        "data": [
-            {
-                "id": item.id,
-                "title": item.title,
-                "description": item.description,
-                "status": item.status,
-                "priority": item.priority,
-                "created_at": item.created_at,
-                "updated_at": item.updated_at,
+        total_pages = ceil(total / page_size)
+        return {
+            "is_success": True,
+            "data": [
+                {
+                    "id": item.id,
+                    "title": item.title,
+                    "description": item.description,
+                    "status": item.status,
+                    "priority": item.priority,
+                    "created_at": item.created_at,
+                    "updated_at": item.updated_at,
+                }
+                for item in items
+            ],
+            "meta": {
+                "page": page,
+                "page_size": page_size,
+                "total": total,
+                "total_pages": total_pages
             }
-            for item in items
-        ],
-        "meta": {
-            "page": page,
-            "page_size": page_size,
-            "total": total,
-            "total_pages": total_pages
         }
-    }
-    return [
-        {
-            "id": item.id,
-            "title": item.title,
-            "description": item.description,
-            "status": item.status,
-            "priority": item.priority,
-            "created_at": item.created_at,
-            "updated_at": item.updated_at,
-        }
-        for item in items
-    ]
+    except:
+        raise HTTPException(status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error")
+        
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=http_status.HTTP_201_CREATED)
 def add_item(item: ItemCreate, db: Session = Depends(get_db)):
     created_at = datetime.now(UTC)
     item = Item(**item.model_dump() | {"created_at": created_at, "updated_at": created_at})
@@ -83,9 +95,9 @@ def add_item(item: ItemCreate, db: Session = Depends(get_db)):
 def edit_Item(item_id: int, item: ItemEdit, db: Session = Depends(get_db)):
     db_item = db.get(Item, item_id)
     if db_item is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Item not found")
     if db_item.status == ItemStatus.DONE.value:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item status: done, which is permanent")
+        raise HTTPException(status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item status: done, which is permanent")
     
     db_item.status = item.status.value
     db_item.updated_at = datetime.now(UTC)
@@ -99,9 +111,9 @@ def edit_Item(item_id: int, item: ItemEdit, db: Session = Depends(get_db)):
 def remove_item(item_id: int, db: Session = Depends(get_db)):
     db_item = db.get(Item, item_id)
     if db_item is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Item not found")
     if db_item.status == ItemStatus.DONE.value:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item status: done. Unable to delete")
+        raise HTTPException(status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item status: done. Unable to delete")
     db.delete(db_item)
     db.commit()
     return {
