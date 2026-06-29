@@ -1,28 +1,17 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from pydantic import BaseModel
-from enum import Enum
+
+from .db import index
 from .routers import queries
 
-app = FastAPI()
 
-class QueryStatus(Enum):
-    NEW = "new"
-    IN_PROGRESS = "in_progress"
-    DONE = "done"
-
-class QueryPriority(Enum):
-    LOW = "low"
-    NORMAL = "normal"
-    HIGH = "high"
-
-class Query(BaseModel):
-    id: int
-    title: str
-    description: str | None = None
-    status: QueryStatus
-    priority: QueryPriority
-    created_at: str
-    updated_at: str
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    index.create_db_and_tables()
+    yield
 
 
+app = FastAPI(lifespan=lifespan)
 app.include_router(queries.router)
+
