@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db.index import Query, get_db, QueryPriority, QueryStatus
 from datetime import datetime, UTC
@@ -8,6 +8,9 @@ class QueryCreate(BaseModel):
     title: str
     description: str | None = None
     priority: QueryPriority = QueryPriority.NORMAL.value
+
+class QueryEdit(BaseModel):
+    status: QueryStatus
 
 router = APIRouter(prefix="/queries")
 
@@ -35,6 +38,34 @@ def add_query(item: QueryCreate, db: Session = Depends(get_db)):
     db.add(item)
     db.commit()
     db.refresh(item)
+    return {
+        "result": "ok"
+    }
+
+@router.put("/{query_id}")
+def edit_query(query_id: int, item: QueryEdit, db: Session = Depends(get_db)):
+    db_item = db.get(Query, query_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if db_item.status == QueryStatus.DONE.value:
+        raise HTTPException(status_code=422, detail="Query status: done, which is permanent")
+    
+    db_item.status = item.status.value
+    db.commit()
+
+    return {
+        "result": "ok"
+    }
+
+@router.delete("/{query_id}")
+def remove_query(query_id: int, db: Session = Depends(get_db)):
+    db_item = db.get(Query, query_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if db_item.status == QueryStatus.DONE.value:
+        raise HTTPException(status_code=422, detail="Query status: done. Unable to delete")
+    db.delete(db_item)
+    db.commit()
     return {
         "result": "ok"
     }
