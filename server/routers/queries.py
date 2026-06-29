@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..db.index import Query, get_db, QueryPriority, QueryStatus
 from datetime import datetime, UTC
@@ -30,7 +30,7 @@ def read_queries(db: Session = Depends(get_db)):
         for item in items
     ]
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def add_query(item: QueryCreate, db: Session = Depends(get_db)):
     created_at = datetime.now(UTC)
     item = Query(**item.model_dump() | {"created_at": created_at, "updated_at": created_at})
@@ -46,9 +46,9 @@ def add_query(item: QueryCreate, db: Session = Depends(get_db)):
 def edit_query(query_id: int, item: QueryEdit, db: Session = Depends(get_db)):
     db_item = db.get(Query, query_id)
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     if db_item.status == QueryStatus.DONE.value:
-        raise HTTPException(status_code=422, detail="Query status: done, which is permanent")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Query status: done, which is permanent")
     
     db_item.status = item.status.value
     db.commit()
@@ -61,9 +61,9 @@ def edit_query(query_id: int, item: QueryEdit, db: Session = Depends(get_db)):
 def remove_query(query_id: int, db: Session = Depends(get_db)):
     db_item = db.get(Query, query_id)
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     if db_item.status == QueryStatus.DONE.value:
-        raise HTTPException(status_code=422, detail="Query status: done. Unable to delete")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Query status: done. Unable to delete")
     db.delete(db_item)
     db.commit()
     return {
