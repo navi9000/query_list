@@ -2,13 +2,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .db import index
+from .db.index import create_db_and_tables
 from .routers import queries
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    index.create_db_and_tables()
+    create_db_and_tables()
     yield
 
 
