@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status as http_status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from ..db.index import Item, get_db, ItemPriority, ItemStatus
@@ -39,7 +39,6 @@ def read_items(
         page_size = 10
         offset = (page - 1) * page_size
         
-
         query = db.query(Item)
         if status:
             query = query.filter(Item.status == status.value)
@@ -76,10 +75,10 @@ def read_items(
             }
         }
     except:
-        raise HTTPException(status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error")
+        raise HTTPException(status_code=500, detail="Server error")
         
 
-@router.post("/", status_code=http_status.HTTP_201_CREATED)
+@router.post("/", status_code=201)
 def add_item(item: ItemCreate, db: Session = Depends(get_db)):
     created_at = datetime.now(UTC)
     item = Item(**item.model_dump() | {"created_at": created_at, "updated_at": created_at})
@@ -95,9 +94,9 @@ def add_item(item: ItemCreate, db: Session = Depends(get_db)):
 def edit_Item(item_id: int, item: ItemEdit, db: Session = Depends(get_db)):
     db_item = db.get(Item, item_id)
     if db_item is None:
-        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Item not found")
     if db_item.status == ItemStatus.DONE.value:
-        raise HTTPException(status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item status: done, which is permanent")
+        raise HTTPException(status_code=422, detail="Item status: done, which is permanent")
     
     db_item.status = item.status.value
     db_item.updated_at = datetime.now(UTC)
@@ -111,9 +110,9 @@ def edit_Item(item_id: int, item: ItemEdit, db: Session = Depends(get_db)):
 def remove_item(item_id: int, db: Session = Depends(get_db)):
     db_item = db.get(Item, item_id)
     if db_item is None:
-        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Item not found")
     if db_item.status == ItemStatus.DONE.value:
-        raise HTTPException(status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Item status: done. Unable to delete")
+        raise HTTPException(status_code=422, detail="Item status: done. Unable to delete")
     db.delete(db_item)
     db.commit()
     return {
