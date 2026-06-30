@@ -1,10 +1,11 @@
-import type { FC, PropsWithChildren } from "react"
+import type { FC } from "react"
+import { Outlet } from "react-router"
 
-const Layout: FC<PropsWithChildren> = ({ children }) => {
+const Layout: FC = () => {
   return (
     <>
       <header>Header</header>
-      {children}
+      <Outlet />
     </>
   )
 }
