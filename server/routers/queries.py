@@ -6,6 +6,7 @@ from datetime import datetime, UTC
 from pydantic import BaseModel
 from math import ceil
 from typing import Optional
+from ..middlewares.user import get_current_user
 
 class ItemCreate(BaseModel):
     title: str
@@ -79,7 +80,10 @@ def read_items(
         
 
 @router.post("/", status_code=201)
-def add_item(item: ItemCreate, db: Session = Depends(get_db)):
+def add_item(
+    item: ItemCreate,
+    db: Session = Depends(get_db)
+):
     created_at = datetime.now(UTC)
     item = Item(**item.model_dump() | {"created_at": created_at, "updated_at": created_at})
 
@@ -91,7 +95,11 @@ def add_item(item: ItemCreate, db: Session = Depends(get_db)):
     }
 
 @router.put("/{item_id}")
-def edit_Item(item_id: int, item: ItemEdit, db: Session = Depends(get_db)):
+def edit_Item(
+    item_id: int,
+    item: ItemEdit,
+    db: Session = Depends(get_db)
+):
     db_item = db.get(Item, item_id)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -107,8 +115,14 @@ def edit_Item(item_id: int, item: ItemEdit, db: Session = Depends(get_db)):
     }
 
 @router.delete("/{item_id}")
-def remove_item(item_id: int, db: Session = Depends(get_db)):
+def remove_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    username: str = Depends(get_current_user)
+):
     db_item = db.get(Item, item_id)
+    if username != "admin":
+        raise HTTPException(status_code=403, detail="You don't have permission to delete an item")
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     if db_item.status == ItemStatus.DONE.value:
