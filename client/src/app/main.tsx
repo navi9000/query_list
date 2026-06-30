@@ -3,11 +3,15 @@ import { createRoot } from "react-dom/client"
 import "./index.css"
 import { Layout } from "@/features/layout"
 import { ItemList } from "@/features/item-list"
+import { Provider } from "react-redux"
+import store from "./store"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Layout>
-      <ItemList />
-    </Layout>
+    <Provider store={store}>
+      <Layout>
+        <ItemList />
+      </Layout>
+    </Provider>
   </StrictMode>,
 )
