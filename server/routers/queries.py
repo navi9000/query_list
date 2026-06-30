@@ -3,14 +3,14 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from ..db.index import Item, get_db, ItemPriority, ItemStatus
 from datetime import datetime, UTC
-from pydantic import BaseModel
+from pydantic import BaseModel, StringConstraints
 from math import ceil
-from typing import Optional
+from typing import Optional, Annotated
 from ..middlewares.user import get_current_user
 
 class ItemCreate(BaseModel):
-    title: str
-    description: str | None = None
+    title: Annotated[str, StringConstraints(min_length=3, max_length=120)] 
+    description: Annotated[str, StringConstraints(max_length=1000)] | None = None
     priority: ItemPriority = ItemPriority.NORMAL.value
 
 class ItemEdit(BaseModel):
