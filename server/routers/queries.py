@@ -11,7 +11,8 @@ from ..middlewares.user import get_current_user
 class ItemCreate(BaseModel):
     title: Annotated[str, StringConstraints(min_length=3, max_length=120)] 
     description: Annotated[str, StringConstraints(max_length=1000)] | None = None
-    priority: ItemPriority = ItemPriority.NORMAL.value
+    status: ItemStatus = ItemStatus.NEW
+    priority: ItemPriority = ItemPriority.NORMAL
 
 class ItemEdit(BaseModel):
     status: ItemStatus
@@ -84,15 +85,24 @@ def add_item(
     item: ItemCreate,
     db: Session = Depends(get_db)
 ):
-    created_at = datetime.now(UTC)
-    item = Item(**item.model_dump() | {"created_at": created_at, "updated_at": created_at})
+    try:
+        created_at = datetime.now(UTC)
+        payload = item.model_dump(exclude_unset=True, mode="json")
+        payload.setdefault("status", ItemStatus.NEW.value)
+        payload.setdefault("priority", ItemPriority.NORMAL.value)
+        payload.update({"created_at": created_at, "updated_at": created_at})
+        new_item = Item(**payload)
 
-    db.add(item)
-    db.commit()
-    db.refresh(item)
-    return {
-        "result": "ok"
-    }
+        db.add(new_item)
+        db.commit()
+        db.refresh(new_item)
+        return {
+            "result": "ok"
+        }
+    except:
+        raise HTTPException(status_code=500, detail="Server error")
+
+
 
 @router.put("/{item_id}")
 def edit_Item(

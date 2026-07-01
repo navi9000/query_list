@@ -1,14 +1,16 @@
 import { useGetItemsQuery, type Item } from "@/entities/item"
-import type { FC } from "react"
+import { useState, type FC } from "react"
 import Typography from "antd/es/typography"
 import Table, { type ColumnsType } from "antd/es/table"
 import Flex from "antd/es/flex"
+import Button from "antd/es/button"
 import { formatDate } from "@/utils/dates"
 import { useSearchParams } from "react-router"
 import SortSelector from "./sort-selector"
 import StatusFilter from "./status-filter"
 import PriorityFilter from "./priority-filter"
 import Search from "./search"
+import CreateModal from "./create-modal"
 
 const columns: ColumnsType<Item> = [
   {
@@ -52,6 +54,15 @@ const ItemList: FC = () => {
     search: search ?? undefined,
     sort_by: sort_by ?? undefined,
   })
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true)
+  }
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false)
+  }
 
   return (
     <div>
@@ -63,6 +74,9 @@ const ItemList: FC = () => {
           <PriorityFilter />
         </Flex>
         <Search />
+      </Flex>
+      <Flex justify="flex-end">
+        <Button onClick={openCreateModal}>Добавить</Button>
       </Flex>
 
       {!isLoading && !isError && !!data && (
@@ -76,6 +90,7 @@ const ItemList: FC = () => {
           }}
         />
       )}
+      <CreateModal isOpen={isCreateModalOpen} close={closeCreateModal} />
     </div>
   )
 }

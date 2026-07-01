@@ -1,35 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-
-export interface Item {
-  id: number
-  title: string
-  description: string | null
-  status: string
-  priority: string
-  created_at: string
-  updated_at: string
-}
-
-interface ItemListResponse {
-  is_success: boolean
-  data: Item[]
-  meta: {
-    page: number
-    page_size: number
-    total: number
-    total_pages: number
-  }
-}
-
-interface ItemCreateRequest {
-  title: string
-  description?: string | null
-  priority?: string
-}
-
-interface ApiResultResponse {
-  result: "ok"
-}
+import type {
+  ApiResultResponse,
+  ItemCreateRequest,
+  ItemListResponse,
+} from "../model/schema"
 
 export const itemApi = createApi({
   reducerPath: "items",

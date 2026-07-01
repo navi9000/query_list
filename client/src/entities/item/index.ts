@@ -4,5 +4,6 @@ export {
   useDeleteItemMutation,
   useEditItemMutation,
   useGetItemsQuery,
-  type Item,
 } from "./api/item-api"
+
+export type { Item, ItemCreateRequest } from "./model/schema"
