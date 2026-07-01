@@ -11,6 +11,10 @@ import StatusFilter from "./status-filter"
 import PriorityFilter from "./priority-filter"
 import Search from "./search"
 import CreateModal from "./create-modal"
+import ModalContextProvider from "./modal-context-provider"
+import { useUpdateModal } from "../api/use-update-modal"
+import UpdateModal from "./update-modal"
+import ItemControls from "./item-controls"
 
 const columns: ColumnsType<Item> = [
   {
@@ -36,7 +40,7 @@ const columns: ColumnsType<Item> = [
   },
   {
     key: "buttons",
-    render: () => <div>Buttons</div>,
+    render: ({ id }) => <ItemControls id={id} />,
   },
 ]
 
@@ -64,34 +68,45 @@ const ItemList: FC = () => {
     setIsCreateModalOpen(false)
   }
 
-  return (
-    <div>
-      <Typography.Title>Список заявок</Typography.Title>
-      <Flex justify="space-between">
-        <Flex gap="small">
-          <SortSelector />
-          <StatusFilter />
-          <PriorityFilter />
-        </Flex>
-        <Search />
-      </Flex>
-      <Flex justify="flex-end">
-        <Button onClick={openCreateModal}>Добавить</Button>
-      </Flex>
+  const { selectedItem, isUpdateModalOpen, openUpdateModal, closeUpdateModal } =
+    useUpdateModal(data?.data)
 
-      {!isLoading && !isError && !!data && (
-        <Table
-          dataSource={data.data}
-          columns={columns}
-          pagination={{
-            total: data.meta.total,
-            current: data.meta.page,
-            pageSize: data.meta.page_size,
-          }}
+  return (
+    <ModalContextProvider open={openUpdateModal}>
+      <div>
+        <Typography.Title>Список заявок</Typography.Title>
+        <Flex justify="space-between">
+          <Flex gap="small">
+            <SortSelector />
+            <StatusFilter />
+            <PriorityFilter />
+          </Flex>
+          <Search />
+        </Flex>
+        <Flex justify="flex-end">
+          <Button onClick={openCreateModal}>Добавить</Button>
+        </Flex>
+
+        {!isLoading && !isError && !!data && (
+          <Table
+            dataSource={data.data}
+            columns={columns}
+            pagination={{
+              total: data.meta.total,
+              current: data.meta.page,
+              pageSize: data.meta.page_size,
+            }}
+            rowKey={(item) => item.id.toString()}
+          />
+        )}
+        <CreateModal isOpen={isCreateModalOpen} close={closeCreateModal} />
+        <UpdateModal
+          isOpen={isUpdateModalOpen}
+          close={closeUpdateModal}
+          item={selectedItem}
         />
-      )}
-      <CreateModal isOpen={isCreateModalOpen} close={closeCreateModal} />
-    </div>
+      </div>
+    </ModalContextProvider>
   )
 }
 

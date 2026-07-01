@@ -43,8 +43,6 @@ const CreateModal: FC<Props> = ({ isOpen, close }) => {
     close()
   }
 
-  console.log({ priority })
-
   return (
     <Modal
       open={isOpen}
