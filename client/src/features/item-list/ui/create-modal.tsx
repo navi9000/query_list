@@ -5,6 +5,7 @@ import Input from "antd/es/input"
 import Select from "antd/es/select"
 import { priorityOptions } from "../model/priority-options"
 import { useAddItemMutation, type ItemCreateRequest } from "@/entities/item"
+import type { ItemPriority } from "@/entities/item/model/schema"
 
 type Props = {
   isOpen: boolean
@@ -15,9 +16,7 @@ const CreateModal: FC<Props> = ({ isOpen, close }) => {
   const [addItem, { isLoading }] = useAddItemMutation()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState<
-    (typeof priorityOptions)[number] | null
-  >(null)
+  const [priority, setPriority] = useState<ItemPriority | null>(null)
 
   const onSubmit: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault()
@@ -29,7 +28,7 @@ const CreateModal: FC<Props> = ({ isOpen, close }) => {
       data.description = description
     }
     if (priority) {
-      data.priority = priority.value
+      data.priority = priority
     }
     const { error } = await addItem(data)
     if (!error) {
@@ -72,15 +71,11 @@ const CreateModal: FC<Props> = ({ isOpen, close }) => {
             onChange={(e) => setDescription(e.target.value)}
           />
         </Form.Item>
-        {/* <Form.Item label="Статус" name="status">
-          <Select options={statusOptions} value={status} onChange={setStatus} />
-        </Form.Item> */}
         <Form.Item label="Приоритет" name="priority">
           <Select
             options={priorityOptions}
             value={priority}
             onChange={setPriority}
-            labelInValue
           />
         </Form.Item>
       </Form>

@@ -31,8 +31,10 @@ type PickAndStringify<T, K extends keyof T> = {
 }
 
 export type ItemCreateRequest = Partial<
-  PickAndStringify<Item, "title" | "description" | "status" | "priority">
+  PickAndStringify<Item, "title" | "description" | "priority">
 >
+
+export type ItemUpdateRequest = Partial<PickAndStringify<Item, "status">>
 
 export interface ApiResultResponse {
   result: "ok"
