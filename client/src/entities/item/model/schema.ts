@@ -36,6 +36,11 @@ export type ItemCreateRequest = Partial<
 
 export type ItemUpdateRequest = Partial<PickAndStringify<Item, "status">>
 
+export type ItemDeleteRequest = {
+  id: number
+  accessToken: string
+}
+
 export interface ApiResultResponse {
   result: "ok"
 }

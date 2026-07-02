@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import type {
   ApiResultResponse,
   ItemCreateRequest,
+  ItemDeleteRequest,
   ItemListResponse,
 } from "../model/schema"
 
@@ -57,12 +58,15 @@ export const itemApi = createApi({
       invalidatesTags: (_result, _error, { id }) => [{ type: "items", id }],
     }),
 
-    deleteItem: builder.mutation<ApiResultResponse, number>({
-      query: (id) => ({
+    deleteItem: builder.mutation<ApiResultResponse, ItemDeleteRequest>({
+      query: ({ id, accessToken }) => ({
         url: `/${id}`,
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }),
-      invalidatesTags: (_result, _error, id) => [{ type: "items", id }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: "items", id }],
     }),
   }),
 })

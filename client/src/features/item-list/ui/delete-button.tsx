@@ -5,16 +5,17 @@ import { type FC } from "react"
 
 interface Props {
   id: number
+  accessToken: string
 }
 
-const DeleteButton: FC<Props> = ({ id }) => {
+const DeleteButton: FC<Props> = ({ id, accessToken }) => {
   const [deleteItem, { isLoading }] = useDeleteItemMutation()
 
   const onClick = async () => {
-    const { error } = await deleteItem(id)
+    const { error } = await deleteItem({ id, accessToken })
   }
   return (
-    <Button onClick={onClick}>
+    <Button onClick={onClick} disabled={isLoading} loading={isLoading}>
       <DeleteOutlined />
     </Button>
   )

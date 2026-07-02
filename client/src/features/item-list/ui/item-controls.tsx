@@ -5,11 +5,13 @@ import { useAuthContext } from "@/features/auth/model/use-auth-context"
 import Flex from "antd/es/flex"
 
 const ItemControls: FC<{ id: number }> = ({ id }) => {
-  const { isAuth } = useAuthContext()
+  const { isAuth, accessToken } = useAuthContext()
   return (
     <Flex justify="flex-end" gap="small">
       <EditButton id={id} />
-      {isAuth && <DeleteButton id={id} />}
+      {isAuth && accessToken && (
+        <DeleteButton id={id} accessToken={accessToken} />
+      )}
     </Flex>
   )
 }
