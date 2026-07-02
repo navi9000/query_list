@@ -6,6 +6,7 @@ import Flex from "antd/es/flex"
 import { useLoginMutation } from "@/features/auth"
 import { useAuthContext } from "@/features/auth/model/use-auth-context"
 import Typography from "antd/es/typography"
+import { storeRefreshToken } from "@/utils/tokens"
 
 const UnauthorizedHeader: FC = () => {
   const [loginRequest, { isLoading, error }] = useLoginMutation()
@@ -21,6 +22,7 @@ const UnauthorizedHeader: FC = () => {
     if (data) {
       const { access_token, refresh_token, username } = data
       saveAccessToken(access_token)
+      storeRefreshToken(refresh_token)
       saveUsername(username)
     }
   }

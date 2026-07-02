@@ -9,11 +9,6 @@ interface RefreshRequest {
   refresh_token: string
 }
 
-interface AuthResponse {
-  access_token: string
-  refresh_token: string
-}
-
 interface LoginResponse {
   access_token: string
   refresh_token: string
@@ -33,7 +28,7 @@ export const authApi = createApi({
       }),
     }),
 
-    refresh: builder.mutation<AuthResponse, RefreshRequest>({
+    refresh: builder.mutation<LoginResponse, RefreshRequest>({
       query: (body) => ({
         url: "/refresh",
         method: "POST",

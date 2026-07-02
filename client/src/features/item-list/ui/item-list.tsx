@@ -45,7 +45,7 @@ const columns: ColumnsType<Item> = [
 ]
 
 const ItemList: FC = () => {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const page = searchParams.get("page")
   const status = searchParams.get("status")
   const priority = searchParams.get("priority")
@@ -95,6 +95,8 @@ const ItemList: FC = () => {
               total: data.meta.total,
               current: data.meta.page,
               pageSize: data.meta.page_size,
+              onChange: (page) =>
+                setSearchParams((prev) => ({ ...prev, page })),
             }}
             rowKey={(item) => item.id.toString()}
           />

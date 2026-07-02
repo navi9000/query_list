@@ -37,7 +37,8 @@ def refresh_tokens(data: RefreshRequest):
 
     return {
         "access_token": new_access_token,
-        "refresh_token": new_refresh_token
+        "refresh_token": new_refresh_token,
+        "username": username
     }
     
 

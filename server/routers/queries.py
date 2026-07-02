@@ -77,7 +77,7 @@ def read_items(
             }
         }
     except:
-        raise HTTPException(status_code=500, detail="Server error")
+        raise HTTPException(status_code=500, detail="Серверная ошибка")
         
 
 @router.post("/", status_code=201)
@@ -100,7 +100,7 @@ def add_item(
             "result": "ok"
         }
     except:
-        raise HTTPException(status_code=500, detail="Server error")
+        raise HTTPException(status_code=500, detail="Серверная ошибка")
 
 
 
@@ -112,9 +112,9 @@ def edit_Item(
 ):
     db_item = db.get(Item, item_id)
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Запись не найдена")
     if db_item.status == ItemStatus.DONE.value:
-        raise HTTPException(status_code=422, detail="Item status: done, which is permanent")
+        raise HTTPException(status_code=422, detail="Запись имеет статус \"Готово\". Его невозможно изменить.")
     
     db_item.status = item.status.value
     db_item.updated_at = datetime.now(UTC)
@@ -132,11 +132,11 @@ def remove_item(
 ):
     db_item = db.get(Item, item_id)
     if username != "admin":
-        raise HTTPException(status_code=403, detail="You don't have permission to delete an item")
+        raise HTTPException(status_code=403, detail="У вас нет разрешения на удаление записи")
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Запись не найдена")
     if db_item.status == ItemStatus.DONE.value:
-        raise HTTPException(status_code=422, detail="Item status: done. Unable to delete")
+        raise HTTPException(status_code=422, detail="Запись имеет статус \"Готово\". Ее невозможно удалить.")
     db.delete(db_item)
     db.commit()
     return {

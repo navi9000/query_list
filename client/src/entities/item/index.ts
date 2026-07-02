@@ -6,4 +6,4 @@ export {
   useGetItemsQuery,
 } from "./api/item-api"
 
-export type { Item, ItemCreateRequest } from "./model/schema"
+export type { Item, ItemCreateRequest, ItemStatus } from "./model/schema"

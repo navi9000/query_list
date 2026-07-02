@@ -4,6 +4,7 @@ import Flex from "antd/es/flex"
 import Typography from "antd/es/typography"
 import Form from "antd/es/form"
 import { useAuthContext } from "@/features/auth/model/use-auth-context"
+import { clearRefreshToken } from "@/utils/tokens"
 
 const AuthorizedHeader: FC = () => {
   const { username, dropUsername, dropAccessToken } = useAuthContext()
@@ -11,6 +12,7 @@ const AuthorizedHeader: FC = () => {
   const onClick = () => {
     dropUsername()
     dropAccessToken()
+    clearRefreshToken()
   }
 
   return (

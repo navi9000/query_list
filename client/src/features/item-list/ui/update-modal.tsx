@@ -3,10 +3,14 @@ import Modal from "antd/es/modal"
 import Form from "antd/es/form"
 import Input from "antd/es/input"
 import Select from "antd/es/select"
+import notification from "antd/es/notification"
+import {
+  useEditItemMutation,
+  type Item,
+  type ItemStatus,
+} from "@/entities/item"
 import { priorityOptions } from "../model/priority-options"
-import { useEditItemMutation, type Item } from "@/entities/item"
 import { statusOptions } from "../model/status-options"
-import type { ItemStatus } from "@/entities/item/model/schema"
 
 type Props = {
   isOpen: boolean
@@ -31,16 +35,19 @@ const UpdateModal: FC<Props> = ({ isOpen, close, item }) => {
       return
     }
     if (status === item.status) {
+      notification.error({ description: "Вы не изменили статус" })
       return
     }
     const { error } = await editItem({
       id: item.id,
       status,
     })
-
-    if (!error) {
-      close()
+    if (error) {
+      notification.error({ description: error.data.detail })
+      return
     }
+
+    close()
   }
 
   const onCancel = () => {
