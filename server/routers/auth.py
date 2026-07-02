@@ -17,13 +17,14 @@ def user_login(data: UserData):
     username = data.username
     password = data.password
     if username != "admin" and password != "admin":
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=400, detail="Неверное имя пользователя или пароль")
     access_token = create_token(data={"username": username}, expires_delta=timedelta(minutes=15))
     refresh_token = create_token(data={"username": username}, expires_delta=timedelta(days=7))
 
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token
+        "refresh_token": refresh_token,
+        "username": username
     }
 
 @router.post("/refresh")
