@@ -1,4 +1,4 @@
-import { useGetItemsQuery, type Item } from "@/entities/item"
+import { useGetItemsQuery, type Item, type ItemStatus } from "@/entities/item"
 import { useState, type FC } from "react"
 import Typography from "antd/es/typography"
 import Table, { type ColumnsType } from "antd/es/table"
@@ -15,6 +15,10 @@ import ModalContextProvider from "./modal-context-provider"
 import { useUpdateModal } from "../api/use-update-modal"
 import UpdateModal from "./update-modal"
 import ItemControls from "./item-controls"
+import { valueAdapter } from "@/utils/value-adapter"
+import { statusOptions } from "../model/status-options"
+import type { ItemPriority } from "@/entities/item/model/schema"
+import { priorityOptions } from "../model/priority-options"
 
 const columns: ColumnsType<Item> = [
   {
@@ -32,11 +36,13 @@ const columns: ColumnsType<Item> = [
     title: "Статус",
     dataIndex: "status",
     key: "status",
+    render: (value: ItemStatus) => valueAdapter(value, statusOptions),
   },
   {
     title: "Приоритет",
     dataIndex: "priority",
     key: "priority",
+    render: (value: ItemPriority) => valueAdapter(value, priorityOptions),
   },
   {
     key: "buttons",
@@ -73,7 +79,7 @@ const ItemList: FC = () => {
 
   return (
     <ModalContextProvider open={openUpdateModal}>
-      <div>
+      <Flex vertical gap="small">
         <Typography.Title>Список заявок</Typography.Title>
         <Flex justify="space-between">
           <Flex gap="small">
@@ -107,7 +113,7 @@ const ItemList: FC = () => {
           close={closeUpdateModal}
           item={selectedItem}
         />
-      </div>
+      </Flex>
     </ModalContextProvider>
   )
 }

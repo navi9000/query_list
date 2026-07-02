@@ -31,12 +31,15 @@ const CreateModal: FC<Props> = ({ isOpen, close }) => {
       data.priority = priority
     }
     const { error } = await addItem(data)
-    if (!error) {
-      setTitle("")
-      setDescription("")
-      setPriority(null)
-      close()
+
+    if (error) {
+      return
     }
+
+    setTitle("")
+    setDescription("")
+    setPriority(null)
+    close()
   }
 
   const onCancel = () => {
