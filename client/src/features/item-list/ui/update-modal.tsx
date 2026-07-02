@@ -78,12 +78,7 @@ const UpdateModal: FC<Props> = ({ isOpen, close, item }) => {
             />
           </Form.Item>
           <Form.Item label="Приоритет" name="priority">
-            <Select
-              options={priorityOptions}
-              // defaultValue={item.priority}
-              // value={item.priority}
-              disabled
-            />
+            <Select options={priorityOptions} disabled />
           </Form.Item>
         </Form>
       )}
