@@ -25,8 +25,6 @@ const UnauthorizedHeader: FC = () => {
     }
   }
 
-  console.log({ error })
-
   return (
     <Form autoComplete="off">
       <Flex justify="flex-end" gap="small">
